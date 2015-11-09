@@ -1,0 +1,143 @@
+<!-- Our beer-list will generate `beer-list-item` elements, so we import it -->
+<link rel="import" href="beer-list-item.html">
+<!-- Import iron-ajax to get the list of beers from the server -->
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="beer-list">
+  <template>
+    <!-- local DOM for your element -->
+    <style>
+      td {
+        border: 1px solid black;
+      }
+    </style>
+
+    <h2><div>Number of beers in list: {{currentBeers}}</div></h2>
+
+    <iron-ajax
+      auto
+      url="../beers/beers.json"
+      params='{}'
+      handle-as="json"
+      on-response="gotBeers"
+      on-error="gotError"
+      debounce-duration="300">
+    </iron-ajax>
+
+    <div class="row">
+      <div class="col-md-2">
+        <!--Sidebar content-->
+        <div>Search: <input value="{{filterText::input}}"></div>
+        <div>Current search: {{filterText}}</div>
+        <div>
+          Sort by:
+          <select value="{{criterium::change}}">
+            <template is="dom-repeat" items="{{criteria}}">
+              <option value="[[item.name]]">[[item.label]]</option>
+            </template>
+          </select>
+          <div>
+            <input type="checkbox" id="descending"  checked="{{descendingSort::change}}" name="sortingOrder">
+            <label for="descending"> Descending sort</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-10">
+        <div class="beers">
+          <template is="dom-repeat" id="beerList" sort="beerSorter" filter="beerFilter" items="{{beers}}">
+            <beer-list-item
+              name="{{item.name}}"
+              description="{{item.description}}"
+              alcohol="{{item.alcohol}}"
+              img="{{item.img}}"
+              id="{{item.id}}">
+            </beer-list-item>
+          </template>
+        </div>
+
+        <table>
+          <tr><th>Row number</th></tr>
+          <template is="dom-repeat" as="number-item" items="[0,1,2,3,4,5,6,7]">
+            <tr>
+              <template is="dom-repeat" as="char-item" items='["a","b","c","d","e","f","g","h"]'>
+                <td>{{number-item}}-{{char-item}}</td>
+              </template>
+            </tr>
+          </template>
+        </table>
+
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  // element registration
+  Polymer({
+    is: "beer-list",
+    // add properties and methods on the element's prototype
+    properties: {
+      filterText: {
+        type: String,
+        observer: "filterTextChanged"
+      },
+      beers: {
+        type: Array
+      },
+      currentBeers: {
+        type: String,
+        computed: "getCurrentBeers(beers, filterText)"
+      },
+      criterium: {
+        type: String,
+        observer: "criteriaChanged"
+      },
+      descendingSort: {
+        type: Boolean,
+        observer: "criteriaChanged",
+        value: false
+      }
+    },
+    criteriaChanged: function(newValue, oldValue) {
+      this.$.beerList.render();
+    },
+    getCurrentBeers: function() {
+      var count = 0;
+      for(var beer in this.beers) {
+        if(this.beerFilter(this.beers[beer]) != null) {
+          count++;
+        }
+      }
+      return count;
+    },
+    filterTextChanged: function(newValue, oldValue) {
+      console.log("Filter text changed, new value: "+newValue);
+    },
+    beerFilter:  function(item) {
+      return item.name.match(new RegExp(this.filterText, 'i'));
+    },
+    filterTextChanged: function(newValue, oldValue) {
+      this.$.beerList.render();
+    },
+    beerSorter: function(a, b) {
+      var invert = 1;
+      if (this.descendingSort) invert = -1;
+      if ( a[this.criterium] === b[this.criterium] ) return 0;
+      if ( a[this.criterium] < b[this.criterium] ) return -1 * invert;
+      if ( a[this.criterium] > b[this.criterium] ) return 1 * invert;
+    },
+    ready: function() {
+
+      this.beers = [];
+
+      this.criteria = [
+        { name: "name", label: "Alphabetical"},
+        { name: "alcohol", label: "Alcohol content" }
+      ];
+      this.criterium = this.criteria[0].name;
+    },
+    gotBeers: function(event, ironRequest) {
+      this.beers = ironRequest.response;
+    }
+  });
+</script>

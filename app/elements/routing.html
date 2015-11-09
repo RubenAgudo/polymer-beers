@@ -1,0 +1,35 @@
+<!-- Import Polymer library -->
+<link rel="import" href="/bower_components/polymer/polymer.html">
+
+<!-- Load page.js -->
+<script src="/bower_components/page.js/page.js"></script>
+
+<!-- Import iron-pages -->
+<link rel="import" href="/bower_components/iron-pages/iron-pages.html">
+
+<script>
+  window.addEventListener('WebComponentsReady', function() {
+    // Grab a reference to our auto-binding template
+    // and give it some initial binding values
+    // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
+    var app = document.querySelector('#app');
+
+    // We use Page.js for routing. This is a Micro
+    // client-side router inspired by the Express router
+    // More info: https://visionmedia.github.io/page.js/
+    page('/beers', function (data) {
+      app.route = 'beers';
+    });
+    page('/beer/:name', function (data) {
+      app.route = 'beer';
+      app.params = data.params;
+      console.log(data.params)
+    });
+    page.redirect('*', '/beers');
+    // add #! before urls
+    page({
+      hashbang: true
+    });
+  });
+
+</script>

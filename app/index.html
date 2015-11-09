@@ -4,12 +4,27 @@
   <meta charset="utf-8">
   <title>Polymer Beer Gallery</title>
   <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <!-- Import `beer-list-item` element -->
+  <link rel="import" href="elements/beer-list.html">
+
+  <!-- Import iron-pages -->
+  <link rel="import" href="/bower_components/iron-pages/iron-pages.html">
+
 </head>
+
 <body>
-  <div class="container">
 
-    <!-- You begin by adding your code here, look at step-01/README.md for more info -->
+  <template is="dom-bind" id="app">
+    <div>
+      <iron-pages attr-for-selected="data-route" selected="{{route}}">
+        <h1 data-route="beer">You have clicked on {{params.name}}</h1>
+      </iron-pages>
 
-  </div>
+      <div class="container">
+        <beer-list></beer-list>
+      </div>
+    </div>
+  </template>
 </body>
 </html>
